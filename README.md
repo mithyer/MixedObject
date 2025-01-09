@@ -2,6 +2,8 @@
 
 MixedObject is a flexible Swift Decodable solution for handling mixed-type JSON decoding, providing type-safe access to nested JSON structures with support for various data types and automatic type conversion.
 
+Encodable is supported now.
+
 ## Features
 
 - 🔄 Type-safe JSON decoding for mixed-type values
