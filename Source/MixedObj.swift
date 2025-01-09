@@ -83,7 +83,7 @@ public struct MOOption {
     }
 }
 
-fileprivate struct MixedCodingKeys: CodingKey {
+struct MixedCodingKeys: CodingKey {
     
     var stringValue: String
     var intValue: Int?
@@ -110,9 +110,9 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
 
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: MixedCodingKeys.self) {
-            self = OP.types.contains(.dic) ? MixedObj(from: container) : .null
+            self = OP.types.contains(.dic) ? try MixedObj(from: container) : .null
         } else if let container = try? decoder.unkeyedContainer() {
-            self = OP.types.contains(.array) ? MixedObj(from: container) : .null
+            self = OP.types.contains(.array) ? try MixedObj(from: container) : .null
         } else if let container = try? decoder.singleValueContainer() {
             if container.decodeNil() {
                 self = .null
@@ -138,7 +138,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
 
-    private init(from container: KeyedDecodingContainer<MixedCodingKeys>) {
+    private init(from container: KeyedDecodingContainer<MixedCodingKeys>) throws {
         var dict: [String: MixedObj<MOOption.AnyObj>] = [:]
         for key in container.allKeys {
             if true == (try? container.decodeNil(forKey: key)) {
@@ -152,15 +152,17 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             } else if let value = try? container.decode(String.self, forKey: key) {
                 dict[key.stringValue] = .string(value)
             } else if let value = try? container.nestedContainer(keyedBy: MixedCodingKeys.self, forKey: key) {
-                dict[key.stringValue] = MixedObj<MOOption.AnyObj>(from: value)
+                dict[key.stringValue] = try MixedObj<MOOption.AnyObj>(from: value)
             } else if let value = try? container.nestedUnkeyedContainer(forKey: key) {
-                dict[key.stringValue] = MixedObj<MOOption.AnyObj>(from: value)
+                dict[key.stringValue] = try MixedObj<MOOption.AnyObj>(from: value)
+            } else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [key], debugDescription: "not supported type by keyed"))
             }
         }
         self = .dictionary(dict)
     }
 
-    private init(from container: UnkeyedDecodingContainer) {
+    private init(from container: UnkeyedDecodingContainer) throws {
         var container = container
         var arr: [MixedObj<MOOption.AnyObj>] = []
         while !container.isAtEnd {
@@ -175,9 +177,11 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             } else if let value = try? container.decode(String.self) {
                 arr.append(.string(value))
             } else if let value = try? container.nestedContainer(keyedBy: MixedCodingKeys.self){
-                arr.append(MixedObj<MOOption.AnyObj>(from: value))
+                arr.append(try MixedObj<MOOption.AnyObj>(from: value))
             } else if let value = try? container.nestedUnkeyedContainer() {
-                arr.append(MixedObj<MOOption.AnyObj>(from: value))
+                arr.append(try MixedObj<MOOption.AnyObj>(from: value))
+            } else {
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "not supported type by unkeyed"))
             }
         }
         self = .array(arr)
@@ -213,17 +217,33 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
     }
     
     public subscript(index: Int) -> MixedObj<MOOption.AnyObj> {
-        if case let .array(list) = self {
-            return list[index]
+        get {
+            if case let .array(list) = self {
+                return list[index]
+            }
+            return .null
         }
-        return .null
+        mutating set(newValue) {
+            if case var .array(list) = self {
+                list[index] = newValue
+                self = .array(list)
+            }
+        }
     }
     
     public subscript(key: String) -> MixedObj<MOOption.AnyObj> {
-        if case let .dictionary(dic) = self {
-            return dic[key] ?? .null
+        get {
+            if case let .dictionary(dic) = self {
+                return dic[key] ?? .null
+            }
+            return .null
         }
-        return .null
+        mutating set(newValue) {
+            if case var .dictionary(dic) = self {
+                dic[key] = newValue
+                self = .dictionary(dic)
+            }
+        }
     }
     
     public func isNull() -> Bool {
