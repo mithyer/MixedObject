@@ -274,18 +274,52 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toArray() -> [MixedObj<MOOption.AnyObj>]? {
-        if case let .array(array) = self {
-            return array
+    public func toArray() -> [Any]? {
+        guard case let .array(array) = self else {
+            return nil
         }
-        return nil
+        return array.compactMap { (element: MixedObj<MOOption.AnyObj>) -> Any? in
+            switch element {
+            case .array:
+                element.toArray()
+            case .dictionary:
+                element.toDic()
+            case .bool(let bool):
+                bool
+            case .double(let double):
+                double
+            case .int(let int):
+                int
+            case .string(let string):
+                string
+            case .null:
+                nil
+            }
+        }
     }
     
-    public func toDic() -> [String: MixedObj<MOOption.AnyObj>]? {
-        if case let .dictionary(dic) = self {
-            return dic
+    public func toDic() -> [String: Any]? {
+        guard case let .dictionary(dic) = self else {
+            return nil
         }
-        return nil
+        return dic.mapValues { (element: MixedObj<MOOption.AnyObj>) -> Any?  in
+            switch element {
+            case .array:
+                element.toArray()
+            case .dictionary:
+                element.toDic()
+            case .bool(let bool):
+                bool
+            case .double(let double):
+                double
+            case .int(let int):
+                int
+            case .string(let string):
+                string
+            case .null:
+                nil
+            }
+        }
     }
     
     public func toDate() -> Date? {
