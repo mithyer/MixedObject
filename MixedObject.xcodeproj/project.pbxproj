@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		71734DC42D2F76E10069149D /* MixedObject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71734DB92D2F76E00069149D /* MixedObject.framework */; };
-		71734DD62D2F77CA0069149D /* MixedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObject.swift */; };
-		71734DD72D2F77CB0069149D /* MixedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObject.swift */; };
+		71734DD62D2F77CA0069149D /* MixedObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObj.swift */; };
+		71734DD72D2F77CB0069149D /* MixedObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObj.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,7 +25,7 @@
 /* Begin PBXFileReference section */
 		71734DB92D2F76E00069149D /* MixedObject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MixedObject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71734DC32D2F76E10069149D /* MixedObjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixedObjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		71734DD42D2F77CA0069149D /* MixedObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedObject.swift; sourceTree = "<group>"; };
+		71734DD42D2F77CA0069149D /* MixedObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedObj.swift; sourceTree = "<group>"; };
 		71734DDD2D2FD7F40069149D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,7 +78,7 @@
 		71734DD52D2F77CA0069149D /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				71734DD42D2F77CA0069149D /* MixedObject.swift */,
+				71734DD42D2F77CA0069149D /* MixedObj.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -199,7 +199,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				71734DD72D2F77CB0069149D /* MixedObject.swift in Sources */,
+				71734DD72D2F77CB0069149D /* MixedObj.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -207,7 +207,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				71734DD62D2F77CA0069149D /* MixedObject.swift in Sources */,
+				71734DD62D2F77CA0069149D /* MixedObj.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
