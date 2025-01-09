@@ -10,7 +10,6 @@
 		71734DC42D2F76E10069149D /* MixedObject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71734DB92D2F76E00069149D /* MixedObject.framework */; };
 		71734DD62D2F77CA0069149D /* MixedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObject.swift */; };
 		71734DD72D2F77CB0069149D /* MixedObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObject.swift */; };
-		71734DDC2D2FB56E0069149D /* MixedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 71734DDA2D2FB56E0069149D /* MixedObject.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,9 +26,7 @@
 		71734DB92D2F76E00069149D /* MixedObject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MixedObject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71734DC32D2F76E10069149D /* MixedObjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixedObjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		71734DD42D2F77CA0069149D /* MixedObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedObject.swift; sourceTree = "<group>"; };
-		71734DDA2D2FB56E0069149D /* MixedObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MixedObject.h; sourceTree = "<group>"; };
 		71734DDD2D2FD7F40069149D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		71734DDF2D2FDA610069149D /* README_CN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README_CN.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -62,12 +59,10 @@
 		71734DAF2D2F76E00069149D = {
 			isa = PBXGroup;
 			children = (
-				71734DDB2D2FB56E0069149D /* Head */,
 				71734DC72D2F76E10069149D /* MixedObjectTests */,
 				71734DBA2D2F76E00069149D /* Products */,
 				71734DD52D2F77CA0069149D /* Source */,
 				71734DDD2D2FD7F40069149D /* README.md */,
-				71734DDF2D2FDA610069149D /* README_CN.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,14 +83,6 @@
 			path = Source;
 			sourceTree = "<group>";
 		};
-		71734DDB2D2FB56E0069149D /* Head */ = {
-			isa = PBXGroup;
-			children = (
-				71734DDA2D2FB56E0069149D /* MixedObject.h */,
-			);
-			path = Head;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -103,7 +90,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				71734DDC2D2FB56E0069149D /* MixedObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,13 +228,13 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 7X9CQ3AD4W;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_MODULE_VERIFIER = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -276,13 +262,13 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 7X9CQ3AD4W;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_MODULE_VERIFIER = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
