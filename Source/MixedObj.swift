@@ -274,11 +274,11 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toArray() -> [Any]? {
+    public func toArray() -> [Any?]? {
         guard case let .array(array) = self else {
             return nil
         }
-        return array.compactMap { (element: MixedObj<MOOption.AnyObj>) -> Any? in
+        return array.map { (element: MixedObj<MOOption.AnyObj>) -> Any? in
             switch element {
             case .array:
                 element.toArray()
@@ -298,7 +298,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toDic() -> [String: Any]? {
+    public func toDic() -> [String: Any?]? {
         guard case let .dictionary(dic) = self else {
             return nil
         }
