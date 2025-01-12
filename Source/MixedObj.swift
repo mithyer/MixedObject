@@ -254,6 +254,9 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
     }
     
     public func toSingle<T>(_ type: T.Type) -> T? {
+        if type == Date.self {
+            return toDate() as? T
+        }
         switch self {
         case .bool(let bool):
             return type == Bool.self ? bool as? T : nil
@@ -268,7 +271,19 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         case .string(let string):
             return type == String.self ? string as? T : nil
         case .int(let int):
-            return type == Int.self ? int as? T : (type == UInt.self ? UInt.init(int) as? T : nil)
+            if type == Int.self {
+                return int as? T
+            }
+            if type == UInt.self {
+                return int > 0 ? UInt.init(int) as? T : nil
+            }
+            if type == Double.self {
+                return Double.init(exactly: int) as? T
+            }
+            if type == Float.self {
+                return Float.init(exactly: int) as? T
+            }
+            return nil
         case .null, .array, .dictionary:
             return nil
         }
