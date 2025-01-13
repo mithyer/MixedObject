@@ -10,7 +10,6 @@ import Foundation
 public enum MixedObjType: String, CaseIterable {
    case bool, int, double, string
    case array, dic
-   case null
 }
 
 public protocol MixedObjTypeOption {
@@ -348,6 +347,20 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         case .null, .array, .dictionary, .bool:
             return nil
         }
+    }
+    
+    public func toDecimal(precisely: Bool = true) -> Decimal? {
+        switch self {
+        case .int(let int):
+            return Decimal(int)
+        case .string(let string):
+            return Decimal(string: string)
+        case .double(let double):
+            return precisely ? nil : Decimal(double)
+        case .null, .array, .dictionary, .bool:
+            return nil
+        }
+        
     }
     
 }
