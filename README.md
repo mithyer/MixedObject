@@ -14,6 +14,14 @@ Encodable is supported now.
 - 🔍 Null value handling
 - 🛡️ Type option protocols for flexible type constraints
 
+## Installation with CocoaPods
+
+To integrate MixedObject into your Xcode project using CocoaPods, specify it in your `Podfile`:
+
+```ruby
+pod 'MixedObject'
+```
+
 ## Usage
 
 ### Basic Usage
