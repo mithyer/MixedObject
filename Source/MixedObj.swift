@@ -256,9 +256,18 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         if type == Date.self {
             return toDate() as? T
         }
+        if type == Decimal.self {
+            return toDecimal() as? T
+        }
         switch self {
         case .bool(let bool):
-            return type == Bool.self ? bool as? T : nil
+            if type == Bool.self {
+                return bool as? T
+            }
+            if type == String.self {
+                return "\(bool)" as? T
+            }
+            return nil
         case .double(let double):
             if type == Double.self {
                 return double as? T
@@ -266,9 +275,30 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             if type == Float.self {
                 return Float.init(double) as? T
             }
+            if type == String.self {
+                return "\(double)" as? T
+            }
             return nil
         case .string(let string):
-            return type == String.self ? string as? T : nil
+            if type == String.self {
+                return string as? T
+            }
+            if type == Bool.self {
+                return (string == "true" ? true : (string == "false" ? false : nil)) as? T
+            }
+            if type == Double.self {
+                return Double(string) as? T
+            }
+            if type == Int.self {
+                return Int(string) as? T
+            }
+            if type == UInt.self {
+                return UInt(string) as? T
+            }
+            if type == Float.self {
+                return Float(string) as? T
+            }
+            return nil
         case .int(let int):
             if type == Int.self {
                 return int as? T
@@ -282,22 +312,43 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             if type == Float.self {
                 return Float.init(exactly: int) as? T
             }
+            if type == String.self {
+                return "\(int)" as? T
+            }
             return nil
         case .null, .array, .dictionary:
             return nil
         }
     }
     
-    public func toArray() -> [Any?]? {
+    public func toArray<T>(valueType: T.Type) -> [T?]? {
+        guard case let .array(array) = self else {
+            return nil
+        }
+        return array.map { element in
+            return element.toSingle(T.self)
+        }
+    }
+    
+    public func toDic<T>(valueType: T.Type) -> [String: T?]? {
+        guard case let .dictionary(dic) = self else {
+            return nil
+        }
+        return dic.mapValues { element in
+            return element.toSingle(T.self)
+        }
+    }
+    
+    public func toAnyValueArray() -> [Any?]? {
         guard case let .array(array) = self else {
             return nil
         }
         return array.map { (element: MixedObj<MOOption.AnyObj>) -> Any? in
             switch element {
             case .array:
-                element.toArray()
+                element.toAnyValueArray()
             case .dictionary:
-                element.toDic()
+                element.toAnyValueDic()
             case .bool(let bool):
                 bool
             case .double(let double):
@@ -312,16 +363,16 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toDic() -> [String: Any?]? {
+    public func toAnyValueDic() -> [String: Any?]? {
         guard case let .dictionary(dic) = self else {
             return nil
         }
         return dic.mapValues { (element: MixedObj<MOOption.AnyObj>) -> Any?  in
             switch element {
             case .array:
-                element.toArray()
+                element.toAnyValueArray()
             case .dictionary:
-                element.toDic()
+                element.toAnyValueDic()
             case .bool(let bool):
                 bool
             case .double(let double):
@@ -349,14 +400,14 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toDecimal(precisely: Bool = true) -> Decimal? {
+    public func toDecimal() -> Decimal? {
         switch self {
         case .int(let int):
             return Decimal(int)
         case .string(let string):
             return Decimal(string: string)
         case .double(let double):
-            return precisely ? nil : Decimal(double)
+            return Decimal(double)
         case .null, .array, .dictionary, .bool:
             return nil
         }
