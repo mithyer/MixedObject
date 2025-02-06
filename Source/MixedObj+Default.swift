@@ -26,6 +26,15 @@ public struct MODefault {
         public static var defaultArray: [Any]? { nil }
     }
     
+    public struct Init: MixedObjValueDefault {
+        public static var defaultBool: Bool? { false }
+        public static var defaultInt: Int? { 0 }
+        public static var defaultString: String? { "" }
+        public static var defaultDouble: Double? { 0 }
+        public static var defaultDic: [String : Any]? { [:] }
+        public static var defaultArray: [Any]? { [] }
+    }
+    
     public struct Empty: MixedObjValueDefault {
         public static var defaultBool: Bool? { nil }
         public static var defaultInt: Int? { nil }
