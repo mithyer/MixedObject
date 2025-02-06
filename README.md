@@ -13,6 +13,7 @@ Encodable is supported now.
 - 🕒 Built-in Date conversion support
 - 🔍 Null value handling
 - 🛡️ Type option protocols for flexible type constraints
+- 🏏 Default value set when decoding failed
 
 ## Installation with CocoaPods
 
@@ -41,20 +42,20 @@ let jsonData = """
 """.data(using: .utf8)!
 
 // Decode with MixedObj
-let decoded = try? JSONDecoder().decode(MixedObj<MOOption.AnyObj>.self, from: jsonData)
+let decoded = try? JSONDecoder().decode(MixedObj<MOOption.AnyObj, MODefault.Null>.self, from: jsonData)
 
 // Access values
 let name = decoded?["name"].toSingle(String.self) // "John"
 let age = decoded?["age"].toSingle(Int.self) // 30
-let scores = decoded?["scores"].toArray() // [85, 90, 95]
+let scores = decoded?["scores"].toArray(Int.self) // [85, 90, 95]
 let lastLogin = decoded?["metadata"]["lastLogin"].toDate() // Date object
 
 // Or define your custom model
 struct CustomModel: Decodable {
-	var name: MixedObj<MOOption.StringOrInt>
-	var age: MixedObj<MOOption.BoolOrInt>
-	var scores: MixedObj<MOOption.Array>
-	var metadata: [String: MixedObj<MOOption.Date>]
+	var name: MixedObj<MOOption.StringOrInt, MODefault.Null>
+	var age: MixedObj<MOOption.BoolOrInt, MODefault.Zero>
+	var scores: MixedObj<MOOption.Array, MODefault.Empty>
+	var metadata: [String: MixedObj<MOOption.Date, MODefault.Null>]
 }
 
 // Decode with CustomModel
@@ -79,6 +80,14 @@ MixedObj provides several predefined type options for different use cases:
 - `MOOption.ArrayOrDic`: Accepts both Array and Dictionary
 - `MOOption.Single`: Accepts primitive types (Bool, Int, Double, String)
 - `MOOption.Date`: Accepts values that can be converted to Date
+- Or accept your own options by implementing MixedObjTypeOption
+
+### Default Value Setting
+- `MODefault.Null`: default set to null for all
+- `MODefault.Empty`: default set to empty for Dictionary, Array, String
+- `MODefault.Zero`: default set to 0 for Int, Bool
+- `MODefault.True`/`MODefault.False`: default set to true/false for Bool
+- Or set your own default value by implementing MixedObjValueDefault
 
 ### Date Handling
 
@@ -90,11 +99,11 @@ MixedObj supports date conversion from multiple formats:
 ```swift
 // Date from timestamp
 let timestampJSON = "1704844800" // 2024-01-09 12:00:00
-let timestampDate = try? JSONDecoder().decode(MixedObj<MOOption.Date>.self, from: timestampJSON.data(using: .utf8)!).toDate()
+let timestampDate = try? JSONDecoder().decode(MixedObj<MOOption.Date, MODefault.Null>.self, from: timestampJSON.data(using: .utf8)!).toDate()
 
 // Date from ISO string
 let isoJSON = "\"2024-01-09T12:00:00.000Z\""
-let isoDate = try? JSONDecoder().decode(MixedObj<MOOption.Date>.self, from: isoJSON.data(using: .utf8)!).toDate()
+let isoDate = try? JSONDecoder().decode(MixedObj<MOOption.Date, MODefault.Null>.self, from: isoJSON.data(using: .utf8)!).toDate()
 ```
 
 ## Requirements

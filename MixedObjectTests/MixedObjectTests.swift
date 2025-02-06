@@ -160,7 +160,7 @@ final class MixedObjTests: XCTestCase {
         
         let decoder = JSONDecoder()
         
-        guard let model = try? decoder.decode(MixedObj<T>.self, from:data) else {
+        guard let model = try? decoder.decode(MixedObj<T, MODefault.Null>.self, from:data) else {
             XCTAssert(false)
             return
         }
@@ -197,7 +197,7 @@ final class MixedObjTests: XCTestCase {
         let testObj: Any = randomSingle()
         let decoder = JSONDecoder()
         let testObjJsonString = testObj is String ? "\"\(testObj as! String)\"" : "\(testObj)"
-        guard let model = try? decoder.decode(MixedObj<T>.self, from: testObjJsonString.data(using: .utf8)!) else {
+        guard let model = try? decoder.decode(MixedObj<T, MODefault.Null>.self, from: testObjJsonString.data(using: .utf8)!) else {
             XCTAssert(false)
             return
         }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension MixedObj: Encodable where OP: MixedObjTypeOption {
+extension MixedObj: Encodable where OP: MixedObjTypeOption, DF: MixedObjValueDefault {
     
     public func encode(to encoder: any Encoder) throws {
         switch self {
@@ -35,7 +35,7 @@ extension MixedObj: Encodable where OP: MixedObjTypeOption {
         }
     }
     
-    private func encode<T: MixedObjTypeOption>(withKeyed container: inout KeyedEncodingContainer<MixedCodingKeys>, dic: [String: MixedObj<T>]) throws {
+    private func encode<T: MixedObjTypeOption, S: MixedObjValueDefault>(withKeyed container: inout KeyedEncodingContainer<MixedCodingKeys>, dic: [String: MixedObj<T, S>]) throws {
         for (key, value) in dic {
             let encodingKey = KeyedEncodingContainer<MixedCodingKeys>.Key(stringValue: key)!
             switch value {
@@ -59,7 +59,7 @@ extension MixedObj: Encodable where OP: MixedObjTypeOption {
         }
     }
     
-    private func encode<T: MixedObjTypeOption>(withUnkeyed container: inout UnkeyedEncodingContainer, array: [MixedObj<T>]) throws {
+    private func encode<T: MixedObjTypeOption, S: MixedObjValueDefault>(withUnkeyed container: inout UnkeyedEncodingContainer, array: [MixedObj<T, S>]) throws {
         for value in array {
             switch value {
             case .null:

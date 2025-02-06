@@ -12,76 +12,6 @@ public enum MixedObjType: String, CaseIterable {
    case array, dic
 }
 
-public protocol MixedObjTypeOption {
-    static var types: Set<MixedObjType> { get }
-    static var description: String { get }
-    static func toDate(_ value: (Int?, Double?, String?)) -> Date?
-}
-
-fileprivate let iso8601withFractionalSeconds: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.calendar = Calendar(identifier: .iso8601)
-    formatter.locale = Locale(identifier: "en_US_POSIX")
-    formatter.timeZone = TimeZone(secondsFromGMT: 0)
-    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-    return formatter
-}()
-
-extension MixedObjTypeOption {
-    
-    public static func toDate(_ value: (Int?, Double?, String?)) -> Date? {
-        if let value = value.0 {
-            return Date.init(timeIntervalSince1970: TimeInterval(value))
-        }
-        if let value = value.1 {
-            return Date.init(timeIntervalSince1970: value)
-        }
-        if let value = value.2 {
-           return iso8601withFractionalSeconds.date(from: value)
-        }
-        return nil
-    }
-    
-    public static var description: String {
-        "unknown"
-    }
-}
-
-public struct MOOption {
-    public struct AnyObj: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = Set(MixedObjType.allCases)
-        public static private(set) var description: String = "Any|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct StringOrInt: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.string, .int]
-        public static private(set) var description: String = "StringOrInt|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct BoolOrInt: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.bool, .int]
-        public static private(set) var description: String = "BoolOrInt|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct Array: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.array]
-        public static private(set) var description: String = "Array|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct Dic: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.dic]
-        public static private(set) var description: String = "Dic|\(types.map({$0.rawValue}).joined(separator: ",")))"
-    }
-    public struct ArrayOrDic: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.dic, .array]
-        public static private(set) var description: String = "ArrayOrDic|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct Single: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.bool, .int, .double, .string]
-        public static private(set) var description: String = "Single|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct Date: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.int, .double, .string]
-        public static private(set) var description: String = "Date|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-}
-
 struct MixedCodingKeys: CodingKey {
     
     var stringValue: String
@@ -97,38 +27,38 @@ struct MixedCodingKeys: CodingKey {
     }
 }
 
-public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible {
+public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodable, CustomStringConvertible {
     
     case bool(Bool)
     case double(Double)
     case string(String)
     case int(Int)
     case null
-    indirect case array([MixedObj<MOOption.AnyObj>])
-    indirect case dictionary([String: MixedObj<MOOption.AnyObj>])
+    indirect case array([MixedObj<MOOption.AnyObj, MODefault.Null>])
+    indirect case dictionary([String: MixedObj<MOOption.AnyObj, MODefault.Null>])
 
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: MixedCodingKeys.self) {
-            self = OP.types.contains(.dic) ? try MixedObj(from: container) : .null
+            self = OP.types.contains(.dic) ? try MixedObj(from: container) : Self.createDefault(type: .dic)
         } else if let container = try? decoder.unkeyedContainer() {
-            self = OP.types.contains(.array) ? try MixedObj(from: container) : .null
+            self = OP.types.contains(.array) ? try MixedObj(from: container) : Self.createDefault(type: .array)
         } else if let container = try? decoder.singleValueContainer() {
             if container.decodeNil() {
                 self = .null
             } else if let value = try? container.decode(Bool.self) {
-                self = OP.types.contains(.bool) ? .bool(value) : .null
+                self = OP.types.contains(.bool) ? .bool(value) : Self.createDefault(type: .bool)
             } else if let value = try? container.decode(Int.self) {
                 if OP.types.contains(.int) {
                     self = .int(value)
                 } else if OP.types.contains(.double), let value = try? container.decode(Double.self) {
                     self = .double(value)
                 } else {
-                    self = .null
+                    self = Self.createDefault(type: .int)
                 }
             } else if let value = try? container.decode(Double.self) {
-                self = OP.types.contains(.double) ? .double(value) : .null
+                self = OP.types.contains(.double) ? .double(value) : Self.createDefault(type: .double)
             } else if let value = try? container.decode(String.self) {
-                self = OP.types.contains(.string) ? .string(value) : .null
+                self = OP.types.contains(.string) ? .string(value) : Self.createDefault(type: .string)
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "single value decode error"))
             }
@@ -138,7 +68,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
     }
 
     private init(from container: KeyedDecodingContainer<MixedCodingKeys>) throws {
-        var dict: [String: MixedObj<MOOption.AnyObj>] = [:]
+        var dict: [String: MixedObj<MOOption.AnyObj, MODefault.Null>] = [:]
         for key in container.allKeys {
             if true == (try? container.decodeNil(forKey: key)) {
                 dict[key.stringValue] = .null
@@ -151,9 +81,9 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             } else if let value = try? container.decode(String.self, forKey: key) {
                 dict[key.stringValue] = .string(value)
             } else if let value = try? container.nestedContainer(keyedBy: MixedCodingKeys.self, forKey: key) {
-                dict[key.stringValue] = try MixedObj<MOOption.AnyObj>(from: value)
+                dict[key.stringValue] = try MixedObj<MOOption.AnyObj, MODefault.Null>(from: value)
             } else if let value = try? container.nestedUnkeyedContainer(forKey: key) {
-                dict[key.stringValue] = try MixedObj<MOOption.AnyObj>(from: value)
+                dict[key.stringValue] = try MixedObj<MOOption.AnyObj, MODefault.Null>(from: value)
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [key], debugDescription: "not supported type by keyed"))
             }
@@ -163,7 +93,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
 
     private init(from container: UnkeyedDecodingContainer) throws {
         var container = container
-        var arr: [MixedObj<MOOption.AnyObj>] = []
+        var arr: [MixedObj<MOOption.AnyObj, MODefault.Null>] = []
         while !container.isAtEnd {
             if true == (try? container.decodeNil()) {
                 arr.append(.null)
@@ -176,9 +106,9 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
             } else if let value = try? container.decode(String.self) {
                 arr.append(.string(value))
             } else if let value = try? container.nestedContainer(keyedBy: MixedCodingKeys.self){
-                arr.append(try MixedObj<MOOption.AnyObj>(from: value))
+                arr.append(try MixedObj<MOOption.AnyObj, MODefault.Null>(from: value))
             } else if let value = try? container.nestedUnkeyedContainer() {
-                arr.append(try MixedObj<MOOption.AnyObj>(from: value))
+                arr.append(try MixedObj<MOOption.AnyObj, MODefault.Null>(from: value))
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "not supported type by unkeyed"))
             }
@@ -215,7 +145,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public subscript(index: Int) -> MixedObj<MOOption.AnyObj> {
+    public subscript(index: Int) -> MixedObj<MOOption.AnyObj, MODefault.Null> {
         get {
             if case let .array(list) = self {
                 return list[index]
@@ -230,7 +160,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public subscript(key: String) -> MixedObj<MOOption.AnyObj> {
+    public subscript(key: String) -> MixedObj<MOOption.AnyObj, MODefault.Null> {
         get {
             if case let .dictionary(dic) = self {
                 return dic[key] ?? .null
@@ -321,7 +251,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toArray<T>(valueType: T.Type) -> [T?]? {
+    public func toArray<T>(_ elementType: T.Type) -> [T?]? {
         guard case let .array(array) = self else {
             return nil
         }
@@ -330,12 +260,12 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         }
     }
     
-    public func toDic<T>(valueType: T.Type) -> [String: T?]? {
+    public func toDic<T>(_ valueType: T.Type) -> [String: T?]? {
         guard case let .dictionary(dic) = self else {
             return nil
         }
-        return dic.mapValues { element in
-            return element.toSingle(T.self)
+        return dic.mapValues { value in
+            return value.toSingle(T.self)
         }
     }
     
@@ -343,7 +273,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         guard case let .array(array) = self else {
             return nil
         }
-        return array.map { (element: MixedObj<MOOption.AnyObj>) -> Any? in
+        return array.map { (element: MixedObj<MOOption.AnyObj, MODefault.Null>) -> Any? in
             switch element {
             case .array:
                 element.toAnyValueArray()
@@ -367,7 +297,7 @@ public enum MixedObj<OP: MixedObjTypeOption>: Decodable, CustomStringConvertible
         guard case let .dictionary(dic) = self else {
             return nil
         }
-        return dic.mapValues { (element: MixedObj<MOOption.AnyObj>) -> Any?  in
+        return dic.mapValues { (element: MixedObj<MOOption.AnyObj, MODefault.Null>) -> Any?  in
             switch element {
             case .array:
                 element.toAnyValueArray()
