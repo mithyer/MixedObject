@@ -35,7 +35,7 @@ extension MixedObj: Encodable where OP: MixedObjTypeOption, DF: MixedObjValueDef
         }
     }
     
-    private func encode<T: MixedObjTypeOption, S: MixedObjValueDefault>(withKeyed container: inout KeyedEncodingContainer<MixedCodingKeys>, dic: [String: MixedObj<T, S>]) throws {
+    func encode<T: MixedObjTypeOption, S: MixedObjValueDefault>(withKeyed container: inout KeyedEncodingContainer<MixedCodingKeys>, dic: [String: MixedObj<T, S>]) throws {
         for (key, value) in dic {
             let encodingKey = KeyedEncodingContainer<MixedCodingKeys>.Key(stringValue: key)!
             switch value {

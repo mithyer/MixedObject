@@ -39,26 +39,30 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
 
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: MixedCodingKeys.self) {
-            self = OP.types.contains(.dic) ? try MixedObj(from: container) : Self.createDefault(type: .dic)
+            self = OP.types.contains(.dic) ? try MixedObj(from: container) : .null
         } else if let container = try? decoder.unkeyedContainer() {
-            self = OP.types.contains(.array) ? try MixedObj(from: container) : Self.createDefault(type: .array)
+            self = OP.types.contains(.array) ? try MixedObj(from: container) : .null
         } else if let container = try? decoder.singleValueContainer() {
             if container.decodeNil() {
-                self = .null
+                if let first = OP.types.first {
+                    self = Self.createDefault(type: first)
+                } else {
+                    self = .null
+                }
             } else if let value = try? container.decode(Bool.self) {
-                self = OP.types.contains(.bool) ? .bool(value) : Self.createDefault(type: .bool)
+                self = OP.types.contains(.bool) ? .bool(value) : .null
             } else if let value = try? container.decode(Int.self) {
                 if OP.types.contains(.int) {
                     self = .int(value)
                 } else if OP.types.contains(.double), let value = try? container.decode(Double.self) {
                     self = .double(value)
                 } else {
-                    self = Self.createDefault(type: .int)
+                    self = .null
                 }
             } else if let value = try? container.decode(Double.self) {
-                self = OP.types.contains(.double) ? .double(value) : Self.createDefault(type: .double)
+                self = OP.types.contains(.double) ? .double(value) : .null
             } else if let value = try? container.decode(String.self) {
-                self = OP.types.contains(.string) ? .string(value) : Self.createDefault(type: .string)
+                self = OP.types.contains(.string) ? .string(value) : .null
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "single value decode error"))
             }
@@ -88,7 +92,11 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [key], debugDescription: "not supported type by keyed"))
             }
         }
-        self = .dictionary(dict)
+        if dict.isEmpty {
+            self = Self.createDefault(type: .dic)
+        } else {
+            self = .dictionary(dict)
+        }
     }
 
     private init(from container: UnkeyedDecodingContainer) throws {
@@ -113,7 +121,11 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "not supported type by unkeyed"))
             }
         }
-        self = .array(arr)
+        if arr.isEmpty {
+            self = Self.createDefault(type: .array)
+        } else {
+            self = .array(arr)
+        }
     }
     
     public var description: String {

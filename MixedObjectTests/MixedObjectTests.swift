@@ -242,6 +242,19 @@ final class MixedObjTests: XCTestCase {
             _testSingle(typeOptions.randomElement()!)
         }
     }
+    
+    struct MyDefaultArray: MixedObjValueDefault {
+        public static let defaultArray: [Any]? = [1, 2, 3]
+    }
+    
+    func testDefaultObj() throws {
+        
+        let decoder = JSONDecoder()
+        let res = try? decoder.decode(MixedObj<MOOption.Array, MyDefaultArray>.self, from: "[]".data(using: .utf8)!)
+
+        XCTAssert(nil != res)
+        XCTAssertEqual(res!.toAnyValueArray()!.compactMap({ $0 as? Int }), [1, 2, 3])
+    }
 
 //    func testPerformanceExample() throws {
 //        // This is an example of a performance test case.
