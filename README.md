@@ -84,9 +84,13 @@ MixedObj provides several predefined type options for different use cases:
 
 ### Default Value Setting
 - `MODefault.Null`: default set to null for all
-- `MODefault.Empty`: default set to empty for Dictionary, Array, String
-- `MODefault.Zero`: default set to 0 for Int, Bool
-- `MODefault.True`/`MODefault.False`: default set to true/false for Bool
+- `MODefault.IntZero`: default set to 0 when null
+- `MODefault.DoubleZero`: default set to 0 when null
+- `MODefault.EmptyString`: default set to "" when null
+- `MODefault.EmptyDic`:  default set to [:] when null
+- `MODefault.EmptyArray`: default set to [] when null
+- `MODefault.True`: default set to true when null
+- `MODefault.False`: default set to false when null
 - Or set your own default value by implementing MixedObjValueDefault
 
 ### Date Handling
