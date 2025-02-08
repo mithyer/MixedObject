@@ -45,15 +45,15 @@ extension MixedObjTypeOption {
 public struct MOOption {
     public struct AnyObj: MixedObjTypeOption {
         public static var types: Set<MixedObjType> = Set(MixedObjType.allCases)
-        public static private(set) var description: String = "Any|\(types.map({$0.rawValue}).joined(separator: ","))"
+        public static private(set) var description: String = "AnyObj|\(types.map({$0.rawValue}).joined(separator: ","))"
     }
-    public struct StringOrInt: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.string, .int]
-        public static private(set) var description: String = "StringOrInt|\(types.map({$0.rawValue}).joined(separator: ","))"
+    public struct Number: MixedObjTypeOption {
+        public static var types: Set<MixedObjType> = [.int, .double]
+        public static private(set) var description: String = "Number|\(types.map({$0.rawValue}).joined(separator: ","))"
     }
-    public struct BoolOrInt: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.bool, .int]
-        public static private(set) var description: String = "BoolOrInt|\(types.map({$0.rawValue}).joined(separator: ","))"
+    public struct NumberOrString: MixedObjTypeOption {
+        public static var types: Set<MixedObjType> = [.int, .double, .string]
+        public static private(set) var description: String = "NumberOrString|\(types.map({$0.rawValue}).joined(separator: ","))"
     }
     public struct Array: MixedObjTypeOption {
         public static var types: Set<MixedObjType> = [.array]
@@ -66,10 +66,6 @@ public struct MOOption {
     public struct ArrayOrDic: MixedObjTypeOption {
         public static var types: Set<MixedObjType> = [.dic, .array]
         public static private(set) var description: String = "ArrayOrDic|\(types.map({$0.rawValue}).joined(separator: ","))"
-    }
-    public struct Single: MixedObjTypeOption {
-        public static var types: Set<MixedObjType> = [.bool, .int, .double, .string]
-        public static private(set) var description: String = "Single|\(types.map({$0.rawValue}).joined(separator: ","))"
     }
     public struct Date: MixedObjTypeOption {
         public static var types: Set<MixedObjType> = [.int, .double, .string]

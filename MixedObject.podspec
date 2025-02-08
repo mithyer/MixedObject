@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'MixedObject'
-  s.version = '1.1.2
+  s.version = '1.1.3
   s.license = 'MIT'
   s.summary = 'A flexible Swift Decodable solution for handling mixed-type JSON decoding'
   s.homepage = 'https://github.com/mithyer/MixedObject'

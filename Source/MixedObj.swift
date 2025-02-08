@@ -38,31 +38,28 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
     indirect case dictionary([String: MixedObj<MOOption.AnyObj, MODefault.Null>])
 
     public init(from decoder: Decoder) throws {
+        
         if let container = try? decoder.container(keyedBy: MixedCodingKeys.self) {
-            self = OP.types.contains(.dic) ? try MixedObj(from: container) : .null
+            self = OP.types.contains(.dic) ? try MixedObj(from: container) : Self.createDefault()
         } else if let container = try? decoder.unkeyedContainer() {
-            self = OP.types.contains(.array) ? try MixedObj(from: container) : .null
+            self = OP.types.contains(.array) ? try MixedObj(from: container) : Self.createDefault()
         } else if let container = try? decoder.singleValueContainer() {
             if container.decodeNil() {
-                if let first = OP.types.first {
-                    self = Self.createDefault(type: first)
-                } else {
-                    self = .null
-                }
+                self = Self.createDefault()
             } else if let value = try? container.decode(Bool.self) {
-                self = OP.types.contains(.bool) ? .bool(value) : .null
+                self = OP.types.contains(.bool) ? .bool(value) : Self.createDefault()
             } else if let value = try? container.decode(Int.self) {
                 if OP.types.contains(.int) {
                     self = .int(value)
                 } else if OP.types.contains(.double), let value = try? container.decode(Double.self) {
                     self = .double(value)
                 } else {
-                    self = .null
+                    self = Self.createDefault()
                 }
             } else if let value = try? container.decode(Double.self) {
-                self = OP.types.contains(.double) ? .double(value) : .null
+                self = OP.types.contains(.double) ? .double(value) : Self.createDefault()
             } else if let value = try? container.decode(String.self) {
-                self = OP.types.contains(.string) ? .string(value) : .null
+                self = OP.types.contains(.string) ? .string(value) : Self.createDefault()
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "single value decode error"))
             }
@@ -92,11 +89,7 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [key], debugDescription: "not supported type by keyed"))
             }
         }
-        if dict.isEmpty {
-            self = Self.createDefault(type: .dic)
-        } else {
-            self = .dictionary(dict)
-        }
+        self = .dictionary(dict)
     }
 
     private init(from container: UnkeyedDecodingContainer) throws {
@@ -121,11 +114,7 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "not supported type by unkeyed"))
             }
         }
-        if arr.isEmpty {
-            self = Self.createDefault(type: .array)
-        } else {
-            self = .array(arr)
-        }
+        self = .array(arr)
     }
     
     public var description: String {
@@ -194,103 +183,131 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
         return false
     }
     
-    public func toSingle<T>(_ type: T.Type) -> T? {
-        if type == Date.self {
-            return toDate() as? T
-        }
-        if type == Decimal.self {
-            return toDecimal() as? T
-        }
+    
+    public func convertTo<T: FixedWidthInteger>(_ type: T.Type) -> T? {
         switch self {
-        case .bool(let bool):
-            if type == Bool.self {
-                return bool as? T
-            }
-            if type == String.self {
-                return "\(bool)" as? T
-            }
-            return nil
         case .double(let double):
-            if type == Double.self {
-                return double as? T
-            }
-            if type == Float.self {
-                return Float.init(double) as? T
-            }
-            if type == String.self {
-                return "\(double)" as? T
-            }
-            return nil
+            return T(double)
         case .string(let string):
-            if type == String.self {
-                return string as? T
-            }
-            if type == Bool.self {
-                return (string == "true" ? true : (string == "false" ? false : nil)) as? T
-            }
-            if type == Double.self {
-                return Double(string) as? T
-            }
-            if type == Int.self {
-                return Int(string) as? T
-            }
-            if type == UInt.self {
-                return UInt(string) as? T
-            }
-            if type == Float.self {
-                return Float(string) as? T
+            return T(string)
+        case .int(let int):
+            return T(int)
+        case .bool, .null, .array, .dictionary:
+            return nil
+        }
+    }
+    
+    public func convertTo<T: StringProtocol>(_ type: T.Type) -> T? {
+        return "\(jsonString())"
+    }
+    
+    public func convertTo<T: BinaryFloatingPoint>(_ type: T.Type) -> T? {
+        switch self {
+        case .double(let double):
+            return T(double)
+        case .string(let string):
+            if let double = Double(string) {
+                return T(double)
             }
             return nil
         case .int(let int):
-            if type == Int.self {
-                return int as? T
-            }
-            if type == UInt.self {
-                return int > 0 ? UInt.init(int) as? T : nil
-            }
-            if type == Double.self {
-                return Double.init(exactly: int) as? T
-            }
-            if type == Float.self {
-                return Float.init(exactly: int) as? T
-            }
-            if type == String.self {
-                return "\(int)" as? T
-            }
-            return nil
-        case .null, .array, .dictionary:
+            return T(int)
+        case .bool, .null, .array, .dictionary:
             return nil
         }
     }
     
-    public func toArray<T>(_ elementType: T.Type) -> [T?]? {
-        guard case let .array(array) = self else {
+    public func convertTo<T>(_ type: T.Type) -> T? {
+        switch self {
+        case let .bool(bool):
+            return bool as? T
+        default:
             return nil
-        }
-        return array.map { element in
-            return element.toSingle(T.self)
         }
     }
     
-    public func toDic<T>(_ valueType: T.Type) -> [String: T?]? {
+    public func convertTo<T: FixedWidthInteger>(_ type: Dictionary<String, T>.Type) -> Dictionary<String, T?>? {
         guard case let .dictionary(dic) = self else {
             return nil
         }
         return dic.mapValues { value in
-            return value.toSingle(T.self)
+            return value.convertTo(T.self)
         }
     }
     
-    public func toAnyValueArray() -> [Any?]? {
+    public func convertTo<T: StringProtocol>(_ type: Dictionary<String, T>.Type) -> Dictionary<String, T?>? {
+        guard case let .dictionary(dic) = self else {
+            return nil
+        }
+        return dic.mapValues { value in
+            return value.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T: BinaryFloatingPoint>(_ type: Dictionary<String, T>.Type) -> Dictionary<String, T?>? {
+        guard case let .dictionary(dic) = self else {
+            return nil
+        }
+        return dic.mapValues { value in
+            return value.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T>(_ type: Dictionary<String, T>.Type) -> Dictionary<String, T?>? {
+        guard case let .dictionary(dic) = self else {
+            return nil
+        }
+        return dic.mapValues { value in
+            return value.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T: FixedWidthInteger>(_ type: Array<T>.Type) -> Array<T?>? {
+        guard case let .array(array) = self else {
+            return nil
+        }
+        return array.map { element in
+            return element.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T: StringProtocol>(_ type: Array<T>.Type) -> Array<T?>? {
+        guard case let .array(array) = self else {
+            return nil
+        }
+        return array.map { element in
+            return element.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T: BinaryFloatingPoint>(_ type: Array<T>.Type) -> Array<T?>? {
+        guard case let .array(array) = self else {
+            return nil
+        }
+        return array.map { element in
+            return element.convertTo(T.self)
+        }
+    }
+    
+    public func convertTo<T>(_ type: Array<T>.Type) -> Array<T?>? {
+        guard case let .array(array) = self else {
+            return nil
+        }
+        return array.map { element in
+            return element.convertTo(T.self)
+        }
+    }
+    
+    public func convertToCommonArray() -> [Any?]? {
         guard case let .array(array) = self else {
             return nil
         }
         return array.map { (element: MixedObj<MOOption.AnyObj, MODefault.Null>) -> Any? in
             switch element {
             case .array:
-                element.toAnyValueArray()
+                element.convertToCommonArray()
             case .dictionary:
-                element.toAnyValueDic()
+                element.convertToCommonDic()
             case .bool(let bool):
                 bool
             case .double(let double):
@@ -305,16 +322,16 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
         }
     }
     
-    public func toAnyValueDic() -> [String: Any?]? {
+    public func convertToCommonDic() -> [String: Any?]? {
         guard case let .dictionary(dic) = self else {
             return nil
         }
         return dic.mapValues { (element: MixedObj<MOOption.AnyObj, MODefault.Null>) -> Any?  in
             switch element {
             case .array:
-                element.toAnyValueArray()
+                element.convertToCommonArray()
             case .dictionary:
-                element.toAnyValueDic()
+                element.convertToCommonDic()
             case .bool(let bool):
                 bool
             case .double(let double):
@@ -355,6 +372,4 @@ public enum MixedObj<OP: MixedObjTypeOption, DF: MixedObjValueDefault>: Decodabl
         }
         
     }
-    
 }
-

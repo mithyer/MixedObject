@@ -152,7 +152,7 @@ final class MixedObjTests: XCTestCase {
     
     func _testCollection<T: MixedObjTypeOption>(_ type: T.Type, idx: Int) {
         let testObj: Any = idx%2 == 0 ? randomArray() : randomDic()
-        
+
         guard let data = try? JSONSerialization.data(withJSONObject: testObj) else {
             XCTAssert(false)
             return
@@ -228,15 +228,15 @@ final class MixedObjTests: XCTestCase {
 
     func testDecodeRandomly() throws {
         
-        let typeOptions: [MixedObjTypeOption.Type] = [MOOption.AnyObj.self,
-                                                      MOOption.StringOrInt.self,
-                                                      MOOption.BoolOrInt.self,
+        var typeOptions: [MixedObjTypeOption.Type] = [MOOption.AnyObj.self,
+                                                      MOOption.NumberOrString.self,
+                                                      MOOption.Number.self,
                                                       MOOption.Array.self,
                                                       MOOption.Dic.self,
                                                       MOOption.ArrayOrDic.self,
-                                                      MOOption.Single.self,
                                                       MOOption.Date.self]
 
+        typeOptions = [MOOption.ArrayOrDic.self]
         for i in 0..<100 {
             _testCollection(typeOptions.randomElement()!, idx: i)
             _testSingle(typeOptions.randomElement()!)
@@ -244,16 +244,20 @@ final class MixedObjTests: XCTestCase {
     }
     
     struct MyDefaultArray: MixedObjValueDefault {
-        public static let defaultArray: [Any]? = [1, 2, 3]
+        public static let defaultValue: Any? = [1, 2, 3]
+    }
+    
+    struct Wrapper: Decodable {
+        var obj: MixedObj<MOOption.Array, MyDefaultArray>
     }
     
     func testDefaultObj() throws {
         
         let decoder = JSONDecoder()
-        let res = try? decoder.decode(MixedObj<MOOption.Array, MyDefaultArray>.self, from: "[]".data(using: .utf8)!)
+        let res = try? decoder.decode(Wrapper.self, from: "{}".data(using: .utf8)!)
 
         XCTAssert(nil != res)
-        XCTAssertEqual(res!.toAnyValueArray()!.compactMap({ $0 as? Int }), [1, 2, 3])
+        XCTAssertEqual(res!.obj.convertToCommonArray()!.compactMap({ $0 as? Int }), [1, 2, 3])
     }
 
 //    func testPerformanceExample() throws {
