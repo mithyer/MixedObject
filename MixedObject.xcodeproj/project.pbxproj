@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		710CF0D82D545CEB00680BA7 /* MixedObj+Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0D72D545CEB00680BA7 /* MixedObj+Option.swift */; };
-		710CF0D92D545CEB00680BA7 /* MixedObj+Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0D72D545CEB00680BA7 /* MixedObj+Option.swift */; };
-		710CF0DB2D545CF700680BA7 /* MixedObj+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0DA2D545CF700680BA7 /* MixedObj+Default.swift */; };
-		710CF0DC2D545CF700680BA7 /* MixedObj+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0DA2D545CF700680BA7 /* MixedObj+Default.swift */; };
+		710CF0D82D545CEB00680BA7 /* MixedObj+Accepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0D72D545CEB00680BA7 /* MixedObj+Accepter.swift */; };
+		710CF0D92D545CEB00680BA7 /* MixedObj+Accepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710CF0D72D545CEB00680BA7 /* MixedObj+Accepter.swift */; };
 		71734DC42D2F76E10069149D /* MixedObject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71734DB92D2F76E00069149D /* MixedObject.framework */; };
 		71734DD62D2F77CA0069149D /* MixedObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObj.swift */; };
 		71734DD72D2F77CB0069149D /* MixedObj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71734DD42D2F77CA0069149D /* MixedObj.swift */; };
@@ -29,8 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		710CF0D72D545CEB00680BA7 /* MixedObj+Option.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MixedObj+Option.swift"; sourceTree = "<group>"; };
-		710CF0DA2D545CF700680BA7 /* MixedObj+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MixedObj+Default.swift"; sourceTree = "<group>"; };
+		710CF0D72D545CEB00680BA7 /* MixedObj+Accepter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MixedObj+Accepter.swift"; sourceTree = "<group>"; };
 		71734DB92D2F76E00069149D /* MixedObject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MixedObject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71734DC32D2F76E10069149D /* MixedObjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MixedObjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		71734DD42D2F77CA0069149D /* MixedObj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixedObj.swift; sourceTree = "<group>"; };
@@ -91,8 +88,7 @@
 			children = (
 				71734DD42D2F77CA0069149D /* MixedObj.swift */,
 				71734DE82D2FEAEE0069149D /* MixedObj+Encodable.swift */,
-				710CF0D72D545CEB00680BA7 /* MixedObj+Option.swift */,
-				710CF0DA2D545CF700680BA7 /* MixedObj+Default.swift */,
+				710CF0D72D545CEB00680BA7 /* MixedObj+Accepter.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -213,10 +209,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				710CF0D82D545CEB00680BA7 /* MixedObj+Option.swift in Sources */,
+				710CF0D82D545CEB00680BA7 /* MixedObj+Accepter.swift in Sources */,
 				71734DD72D2F77CB0069149D /* MixedObj.swift in Sources */,
 				71734DE92D2FEAEE0069149D /* MixedObj+Encodable.swift in Sources */,
-				710CF0DC2D545CF700680BA7 /* MixedObj+Default.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,8 +221,7 @@
 			files = (
 				71734DEA2D2FEAEE0069149D /* MixedObj+Encodable.swift in Sources */,
 				71734DD62D2F77CA0069149D /* MixedObj.swift in Sources */,
-				710CF0D92D545CEB00680BA7 /* MixedObj+Option.swift in Sources */,
-				710CF0DB2D545CF700680BA7 /* MixedObj+Default.swift in Sources */,
+				710CF0D92D545CEB00680BA7 /* MixedObj+Accepter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

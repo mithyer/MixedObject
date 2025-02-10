@@ -150,7 +150,7 @@ final class MixedObjTests: XCTestCase {
         return true
     }
     
-    func _testCollection<T: MixedObjTypeOption>(_ type: T.Type, idx: Int) {
+    func _testCollection<T: MixedObjRootAccepter>(_ type: T.Type, idx: Int) {
         let testObj: Any = idx%2 == 0 ? randomArray() : randomDic()
 
         guard let data = try? JSONSerialization.data(withJSONObject: testObj) else {
@@ -160,12 +160,12 @@ final class MixedObjTests: XCTestCase {
         
         let decoder = JSONDecoder()
         
-        guard let model = try? decoder.decode(MixedObj<T, MODefault.Null>.self, from:data) else {
+        guard let model = try? decoder.decode(MixedObj<T>.self, from:data) else {
             XCTAssert(false)
             return
         }
         
-        if !T.types.contains(.array) && !T.types.contains(.dic) {
+        if !T.acceptDic() && !T.acceptArray() {
             XCTAssert(model.isNull())
             return
         }
@@ -177,14 +177,14 @@ final class MixedObjTests: XCTestCase {
         
 
         if testObj is [Any] {
-            if !T.types.contains(.array) {
+            if !T.acceptArray() {
                 XCTAssert(model.isNull())
                 return
             }
             let testObjShadow = try! JSONSerialization.jsonObject(with: jsonString.data(using: .utf8)!) as! [Any]
             XCTAssert(compareArray(array1: testObj as! [Any], array2: testObjShadow))
         } else if testObj is [String: Any] {
-            if !T.types.contains(.dic) {
+            if !T.acceptDic() {
                 XCTAssert(model.isNull())
                 return
             }
@@ -193,27 +193,27 @@ final class MixedObjTests: XCTestCase {
         }
     }
     
-    func _testSingle<T: MixedObjTypeOption>(_ type: T.Type) {
+    func _testSingle<T: MixedObjRootAccepter>(_ type: T.Type) {
         let testObj: Any = randomSingle()
         let decoder = JSONDecoder()
         let testObjJsonString = testObj is String ? "\"\(testObj as! String)\"" : "\(testObj)"
-        guard let model = try? decoder.decode(MixedObj<T, MODefault.Null>.self, from: testObjJsonString.data(using: .utf8)!) else {
+        guard let model = try? decoder.decode(MixedObj<T>.self, from: testObjJsonString.data(using: .utf8)!) else {
             XCTAssert(false)
             return
         }
-        if testObj is Bool, !T.types.contains(.bool) {
+        if let testObj = testObj as? Bool, !T.acceptBool(value: testObj) {
             XCTAssert(model.isNull())
             return
         }
-        if testObj is Double, !T.types.contains(.double) {
+        if let testObj = testObj as? Double, !T.acceptDouble(value: testObj) {
             XCTAssert(model.isNull())
             return
         }
-        if testObj is Int, !T.types.contains(.int) {
+        if let testObj = testObj as? Int, !T.acceptInt(value: testObj) {
             XCTAssert(model.isNull())
             return
         }
-        if testObj is String, !T.types.contains(.string) {
+        if let testObj = testObj as? String, !T.acceptString(value: testObj) {
             XCTAssert(model.isNull())
             return
         }
@@ -228,27 +228,21 @@ final class MixedObjTests: XCTestCase {
 
     func testDecodeRandomly() throws {
         
-        var typeOptions: [MixedObjTypeOption.Type] = [MOOption.AnyObj.self,
-                                                      MOOption.NumberOrString.self,
-                                                      MOOption.Number.self,
-                                                      MOOption.Array.self,
-                                                      MOOption.Dic.self,
-                                                      MOOption.ArrayOrDic.self,
-                                                      MOOption.Date.self]
+        let typeOptions: [MixedObjRootAccepter.Type] = [MXRootAccepter.All.self,
+                                                        MXRootAccepter.BoolConvertable.self,
+                                                        MXRootAccepter.NumberConvertable.self,
+                                                        MXRootAccepter.DateConvertable.self,
+                                                        MXRootAccepter.DicOrArray.self  ]
 
-        typeOptions = [MOOption.ArrayOrDic.self]
         for i in 0..<100 {
             _testCollection(typeOptions.randomElement()!, idx: i)
             _testSingle(typeOptions.randomElement()!)
         }
     }
     
-    struct MyDefaultArray: MixedObjValueDefault {
-        public static let defaultValue: Any? = [1, 2, 3]
-    }
-    
+
     struct Wrapper: Decodable {
-        var obj: MixedObj<MOOption.Array, MyDefaultArray>
+        var obj: MixedObj<MXRootAccepter.DicOrArray>
     }
     
     func testDefaultObj() throws {
@@ -257,7 +251,7 @@ final class MixedObjTests: XCTestCase {
         let res = try? decoder.decode(Wrapper.self, from: "{}".data(using: .utf8)!)
 
         XCTAssert(nil != res)
-        XCTAssertEqual(res!.obj.convertToCommonArray()!.compactMap({ $0 as? Int }), [1, 2, 3])
+        XCTAssertEqual(res!.obj.toArray(with: [1, 2, 3])!.compactMap({ $0 as? Int }), [1, 2, 3])
     }
 
 //    func testPerformanceExample() throws {
