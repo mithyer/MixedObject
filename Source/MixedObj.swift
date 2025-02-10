@@ -129,6 +129,20 @@ public enum MixedObj<T: MixedObjRootAccepter>: Decodable, CustomStringConvertibl
         self = .array(arr)
     }
     
+    public init(from data: Data) {
+        let decoder = JSONDecoder()
+        self = (try? decoder.decode(Self.self, from: data)) ?? .null
+    }
+    
+    public init(from string: String) {
+        let decoder = JSONDecoder()
+        guard let data = string.data(using: .utf8) else {
+            self = .null
+            return
+        }
+        self = (try? decoder.decode(Self.self, from: data)) ?? .null
+    }
+    
     public var description: String {
         return "==>\nMixedObj(\(T.self)):\n\(jsonString())\n<=="
     }
